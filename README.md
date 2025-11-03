@@ -34,6 +34,7 @@ This project implements a **generic AI Agent Connector for Bonita** with an **in
 - Java 17+ and Maven 3.6+
 - Python 3.9+
 - Docker (optional, for containerized deployment)
+- Bonita 10.2.0+ (for Studio integration)
 
 ### 1. Start the RAG Agent
 

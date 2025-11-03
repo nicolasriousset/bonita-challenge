@@ -11,6 +11,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,9 @@ public class AIAgentConnector extends AbstractConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AIAgentConnector.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    // Store outputs for testing access
+    private final Map<String, Object> outputs = new HashMap<>();
 
     // Input parameters
     protected static final String AGENT_URL = "agentUrl";
@@ -136,20 +140,21 @@ public class AIAgentConnector extends AbstractConnector {
                         parseAndSetOutputs(responseJson);
                     } else {
                         // Handle error response
-                        setOutputParameter(STATUS, "error");
-                        setOutputParameter(ERROR, "HTTP " + statusCode + ": " + responseBody);
-                        setOutputParameter(OUTPUT, "{}");
-                        setOutputParameter(USAGE, "{}");
+                        setAndStoreOutputParameter(STATUS, "error");
+                        setAndStoreOutputParameter(ERROR, "HTTP " + statusCode + ": " + responseBody);
+                        setAndStoreOutputParameter(OUTPUT, "{}");
+                        setAndStoreOutputParameter(USAGE, "{}");
+                        throw new ConnectorException("Agent returned error status: " + statusCode);
                     }
                 }
             }
 
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             LOGGER.error("Error communicating with AI Agent", e);
-            setOutputParameter(STATUS, "error");
-            setOutputParameter(ERROR, "Communication error: " + e.getMessage());
-            setOutputParameter(OUTPUT, "{}");
-            setOutputParameter(USAGE, "{}");
+            setAndStoreOutputParameter(STATUS, "error");
+            setAndStoreOutputParameter(ERROR, "Communication error: " + e.getMessage());
+            setAndStoreOutputParameter(OUTPUT, "{}");
+            setAndStoreOutputParameter(USAGE, "{}");
             throw new ConnectorException("Failed to communicate with AI Agent: " + e.getMessage(), e);
         }
     }
@@ -159,32 +164,47 @@ public class AIAgentConnector extends AbstractConnector {
             // Extract status
             String status = responseJson.has("status") ? 
                 responseJson.get("status").asText() : "ok";
-            setOutputParameter(STATUS, status);
+            setAndStoreOutputParameter(STATUS, status);
 
             // Extract output
             String output = responseJson.has("output") ? 
                 responseJson.get("output").toString() : "{}";
-            setOutputParameter(OUTPUT, output);
+            setAndStoreOutputParameter(OUTPUT, output);
 
             // Extract usage
             String usage = responseJson.has("usage") ? 
                 responseJson.get("usage").toString() : "{}";
-            setOutputParameter(USAGE, usage);
+            setAndStoreOutputParameter(USAGE, usage);
 
             // Extract error (if any)
             String error = responseJson.has("error") && !responseJson.get("error").isNull() ? 
                 responseJson.get("error").asText() : null;
-            setOutputParameter(ERROR, error);
+            setAndStoreOutputParameter(ERROR, error);
 
             LOGGER.info("Agent response - Status: {}, Has output: {}", 
                 status, responseJson.has("output"));
 
         } catch (Exception e) {
             LOGGER.error("Error parsing agent response", e);
-            setOutputParameter(STATUS, "error");
-            setOutputParameter(ERROR, "Response parsing error: " + e.getMessage());
-            setOutputParameter(OUTPUT, "{}");
-            setOutputParameter(USAGE, "{}");
+            setAndStoreOutputParameter(STATUS, "error");
+            setAndStoreOutputParameter(ERROR, "Response parsing error: " + e.getMessage());
+            setAndStoreOutputParameter(OUTPUT, "{}");
+            setAndStoreOutputParameter(USAGE, "{}");
         }
+    }
+
+    /**
+     * Public accessor for output parameters (for testing)
+     */
+    public Object getOutputParameter(String name) {
+        return outputs.get(name);
+    }
+
+    /**
+     * Helper to set output parameter and store in test-accessible map
+     */
+    private void setAndStoreOutputParameter(String name, Object value) {
+        setOutputParameter(name, value);
+        outputs.put(name, value);
     }
 }

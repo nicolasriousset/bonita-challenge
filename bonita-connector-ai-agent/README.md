@@ -136,7 +136,7 @@ All errors are captured in the `status` and `error` output parameters.
 ## Requirements
 
 - Java 17+
-- Bonita 7.14.0+
+- Bonita 10.2.0+
 - Maven 3.6+
 
 ## License

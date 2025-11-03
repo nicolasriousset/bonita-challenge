@@ -2,6 +2,46 @@
 
 All notable changes and development steps for this project.
 
+## [1.0.2] - 2025-11-03
+
+### ✅ Testing & Fixes
+
+#### Test Execution
+- **All 7 integration tests passing** ✅
+  - Test 1: Simple RAG query
+  - Test 2: Conflict resolution with recent document priority
+  - Test 3: Low confidence response handling
+  - Test 4: Agent error handling (HTTP 500)
+  - Test 5: Input validation
+  - Test 6: Authenticated requests
+  - Test 7: Custom parameters
+
+#### Bug Fixes
+- Fixed `getOutputParameter()` API compatibility for Bonita 10.2.0
+  - Added internal `outputs` Map for test access
+  - Created `setAndStoreOutputParameter()` helper method
+  - Ensured proper exception throwing for HTTP error responses
+- Added `ParseException` handling for Apache HttpClient 5
+- Configured Maven Surefire to run `*IT.java` integration tests
+
+**Testing Command**: `mvn test`
+
+---
+
+## [1.0.1] - 2025-11-03
+
+### 🔄 Updated
+
+#### Version Updates
+- **Bonita version**: Updated from 7.14.0 to 10.2.0
+  - Updated `pom.xml` with new Bonita version
+  - Updated all documentation references
+  - Maintains compatibility with Java 17
+
+**Rationale**: Bonita 10.2.0 is the latest stable version with improved features and better cloud support.
+
+---
+
 ## [1.0.0] - 2025-11-03
 
 ### ✨ Initial Release - Complete Challenge Implementation

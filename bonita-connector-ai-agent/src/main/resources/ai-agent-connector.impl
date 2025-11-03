@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<implementation:connectorImplementation xmlns:implementation="http://www.bonitasoft.org/ns/connector/implementation/6.0">
+    <implementationId>ai-agent-connector-impl</implementationId>
+    <implementationVersion>1.0.0</implementationVersion>
+    <definitionId>ai-agent-connector</definitionId>
+    <definitionVersion>1.0.0</definitionVersion>
+    <implementationClassname>com.bonitasoft.connector.aiagent.AIAgentConnector</implementationClassname>
+    <description>Implementation of AI Agent Connector</description>
+    <hasSources>true</hasSources>
+</implementation:connectorImplementation>

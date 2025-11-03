@@ -5,7 +5,8 @@ Intelligent RAG (Retrieval-Augmented Generation) Agent built with **Java 17** an
 ## Features
 
 - 🚀 **Spring Boot** REST API
-- 🔍 **Document Retrieval** with similarity scoring
+- � **Vector Store** with TF-IDF embeddings (in-memory)
+- 🔍 **Cosine Similarity** for document retrieval
 - ⚔️ **Conflict Detection** between multiple document versions
 - 🎯 **Smart Resolution** using most recent documents
 - 📊 **Confidence Scoring** for answers
@@ -22,7 +23,10 @@ rag-agent-java/
 │   │   │   ├── controller/
 │   │   │   │   └── AgentController.java      # REST endpoints
 │   │   │   ├── service/
-│   │   │   │   └── RagService.java           # RAG logic
+│   │   │   │   ├── RagService.java           # RAG logic
+│   │   │   │   └── SimpleVectorStore.java    # Vector store (TF-IDF)
+│   │   │   ├── config/
+│   │   │   │   └── VectorStoreConfig.java    # Vector store bean
 │   │   │   └── model/
 │   │   │       ├── AgentRequest.java         # Request DTO
 │   │   │       ├── AgentResponse.java        # Response DTO
@@ -36,6 +40,25 @@ rag-agent-java/
 ├── Dockerfile                                 # Multi-stage build
 └── pom.xml                                    # Maven dependencies
 ```
+
+## Vector Store Implementation
+
+The RAG agent uses a **custom in-memory vector store** with the following features:
+
+### TF-IDF Vectorization
+- **Term Frequency (TF)**: Measures how frequently a term appears in a document
+- **Inverse Document Frequency (IDF)**: Measures how important a term is across all documents
+- **Formula**: `TF-IDF = TF * log((N + 1) / (DF + 1))`
+
+### Cosine Similarity
+- Measures similarity between query and documents using normalized vectors
+- Returns documents ranked by relevance score
+
+### Features
+- **Stop words filtering**: Removes common English words
+- **Text normalization**: Lowercasing, special char removal
+- **Automatic reindexing**: Updates vectors when documents are added
+- **Fast in-memory search**: No external dependencies required
 
 ## API Endpoints
 

@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * RAG Service with conflict detection and resolution
+ * RAG Service with Vector Store, conflict detection and resolution
  */
 @Slf4j
 @Service
@@ -30,10 +30,11 @@ public class RagService {
     private int maxSources;
 
     private final ObjectMapper objectMapper;
-    private final List<Document> documents = new ArrayList<>();
+    private final SimpleVectorStore vectorStore;
 
-    public RagService(ObjectMapper objectMapper) {
+    public RagService(ObjectMapper objectMapper, SimpleVectorStore vectorStore) {
         this.objectMapper = objectMapper;
+        this.vectorStore = vectorStore;
     }
 
     @PostConstruct
@@ -57,34 +58,31 @@ public class RagService {
                         .category((String) docData.get("category"))
                         .build();
                     
-                    documents.add(doc);
-                    log.info("Loaded document: {}", doc.getTitle());
+                    // Add document to vector store
+                    vectorStore.addDocument(doc);
+                    log.info("Loaded document into vector store: {}", doc.getTitle());
                 } catch (Exception e) {
                     log.error("Error loading document {}: {}", resource.getFilename(), e.getMessage());
                 }
             }
             
-            log.info("Loaded {} documents", documents.size());
+            log.info("Loaded {} documents into vector store", vectorStore.getAllDocuments().size());
         } catch (IOException e) {
             log.error("Error loading documents: {}", e.getMessage());
         }
     }
 
     /**
-     * Process RAG query with conflict detection
+     * Process RAG query with vector search and conflict detection
      */
     public AgentResponse processQuery(String question) {
         log.info("Processing query: {}", question);
 
-        // Retrieve relevant documents
-        List<DocumentScore> scoredDocs = documents.stream()
-            .map(doc -> new DocumentScore(doc, doc.calculateSimilarity(question)))
-            .filter(ds -> ds.score > 0.1) // Minimum relevance threshold
-            .sorted(Comparator.comparingDouble(DocumentScore::getScore).reversed())
-            .limit(maxSources)
-            .collect(Collectors.toList());
+        // Retrieve relevant documents using vector search
+        List<Document> relevantDocs = vectorStore.search(question, maxSources);
+        log.debug("Found {} relevant documents using vector search", relevantDocs.size());
 
-        if (scoredDocs.isEmpty()) {
+        if (relevantDocs.isEmpty()) {
             return AgentResponse.builder()
                 .status("ok")
                 .output(Map.of(
@@ -92,25 +90,25 @@ public class RagService {
                     "confidence", 0.0,
                     "sources", List.of()
                 ))
-                .usage(Map.of("documentsSearched", documents.size()))
+                .usage(Map.of("documentsSearched", vectorStore.getAllDocuments().size()))
                 .build();
         }
 
         // Detect conflicts
-        ConflictDetectionResult conflictResult = detectConflicts(scoredDocs, question);
+        ConflictDetectionResult conflictResult = detectConflicts(relevantDocs, question);
 
         // Build response
         Map<String, Object> output = new HashMap<>();
-        output.put("answer", generateAnswer(scoredDocs, conflictResult));
-        output.put("confidence", calculateConfidence(scoredDocs, conflictResult));
-        output.put("sources", buildSources(scoredDocs));
+        output.put("answer", generateAnswer(relevantDocs, conflictResult));
+        output.put("confidence", calculateConfidence(relevantDocs, conflictResult));
+        output.put("sources", buildSources(relevantDocs));
 
         AgentResponse.AgentResponseBuilder responseBuilder = AgentResponse.builder()
             .status("ok")
             .output(output)
             .usage(Map.of(
-                "documentsSearched", documents.size(),
-                "relevantDocuments", scoredDocs.size()
+                "documentsSearched", vectorStore.getAllDocuments().size(),
+                "relevantDocuments", relevantDocs.size()
             ));
 
         if (conflictResult.hasConflict) {
@@ -128,33 +126,33 @@ public class RagService {
     /**
      * Detect conflicts between documents
      */
-    private ConflictDetectionResult detectConflicts(List<DocumentScore> scoredDocs, String question) {
-        if (scoredDocs.size() < 2) {
+    private ConflictDetectionResult detectConflicts(List<Document> docs, String question) {
+        if (docs.size() < 2) {
             return new ConflictDetectionResult(false, List.of(), "");
         }
 
         // Group documents by category
-        Map<String, List<DocumentScore>> byCategory = scoredDocs.stream()
-            .collect(Collectors.groupingBy(ds -> ds.document.getCategory()));
+        Map<String, List<Document>> byCategory = docs.stream()
+            .collect(Collectors.groupingBy(Document::getCategory));
 
         // Check for conflicts within same category
-        for (Map.Entry<String, List<DocumentScore>> entry : byCategory.entrySet()) {
-            List<DocumentScore> categoryDocs = entry.getValue();
+        for (Map.Entry<String, List<Document>> entry : byCategory.entrySet()) {
+            List<Document> categoryDocs = entry.getValue();
             if (categoryDocs.size() > 1) {
                 // Check if documents have different dates
                 Set<LocalDate> dates = categoryDocs.stream()
-                    .map(ds -> ds.document.getDate())
+                    .map(Document::getDate)
                     .collect(Collectors.toSet());
 
                 if (dates.size() > 1) {
                     List<String> conflictingSources = categoryDocs.stream()
-                        .map(ds -> ds.document.getTitle() + " (" + ds.document.getDate() + ")")
+                        .map(doc -> doc.getTitle() + " (" + doc.getDate() + ")")
                         .collect(Collectors.toList());
 
                     String reasoning = String.format(
                         "Multiple versions of %s policy found. Using most recent version from %s.",
                         entry.getKey(),
-                        categoryDocs.get(0).document.getDate()
+                        categoryDocs.get(0).getDate()
                     );
 
                     return new ConflictDetectionResult(true, conflictingSources, reasoning);
@@ -168,19 +166,18 @@ public class RagService {
     /**
      * Generate answer from documents
      */
-    private String generateAnswer(List<DocumentScore> scoredDocs, ConflictDetectionResult conflictResult) {
+    private String generateAnswer(List<Document> docs, ConflictDetectionResult conflictResult) {
         if (conflictResult.hasConflict) {
             // Use most recent document
-            Document mostRecent = scoredDocs.stream()
-                .max(Comparator.comparing(ds -> ds.document.getDate()))
-                .map(ds -> ds.document)
-                .orElse(scoredDocs.get(0).document);
+            Document mostRecent = docs.stream()
+                .max(Comparator.comparing(Document::getDate))
+                .orElse(docs.get(0));
 
             return extractRelevantContent(mostRecent);
         }
 
-        // Use highest scoring document
-        return extractRelevantContent(scoredDocs.get(0).document);
+        // Use highest scoring document (first in list from vector search)
+        return extractRelevantContent(docs.get(0));
     }
 
     /**
@@ -198,50 +195,38 @@ public class RagService {
     /**
      * Calculate confidence score
      */
-    private double calculateConfidence(List<DocumentScore> scoredDocs, ConflictDetectionResult conflictResult) {
-        if (scoredDocs.isEmpty()) {
+    private double calculateConfidence(List<Document> docs, ConflictDetectionResult conflictResult) {
+        if (docs.isEmpty()) {
             return 0.0;
         }
 
-        double baseConfidence = scoredDocs.get(0).score;
+        // Base confidence on number of relevant documents
+        double baseConfidence = Math.min(0.9, 0.5 + (docs.size() * 0.1));
 
         // Reduce confidence if conflict detected
         if (conflictResult.hasConflict) {
             return Math.max(0.5, baseConfidence * 0.8);
         }
 
-        return Math.min(0.95, baseConfidence);
+        return baseConfidence;
     }
 
     /**
      * Build sources list
      */
-    private List<Map<String, Object>> buildSources(List<DocumentScore> scoredDocs) {
-        return scoredDocs.stream()
-            .map(ds -> Map.<String, Object>of(
-                "title", ds.document.getTitle(),
-                "date", ds.document.getDate().toString(),
-                "version", ds.document.getVersion(),
-                "relevance", Math.round(ds.score * 100.0) / 100.0
-            ))
+    private List<Map<String, Object>> buildSources(List<Document> docs) {
+        return docs.stream()
+            .map(doc -> {
+                Map<String, Object> source = new HashMap<>();
+                source.put("title", doc.getTitle());
+                source.put("date", doc.getDate().toString());
+                source.put("version", doc.getVersion());
+                return source;
+            })
             .collect(Collectors.toList());
     }
 
-    // Helper classes
-    private static class DocumentScore {
-        final Document document;
-        final double score;
-
-        DocumentScore(Document document, double score) {
-            this.document = document;
-            this.score = score;
-        }
-
-        public double getScore() {
-            return score;
-        }
-    }
-
+    // Helper class
     private static class ConflictDetectionResult {
         final boolean hasConflict;
         final List<String> conflictingSources;

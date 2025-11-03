@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * Document representation for RAG
@@ -16,6 +17,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Document {
 
+    @Builder.Default
+    private String id = UUID.randomUUID().toString();
     private String title;
     private String content;
     private LocalDate date;

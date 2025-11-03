@@ -2,8 +2,7 @@
 
 ## Prerequisites
 
-- Java 17+ and Maven 3.6+
-- Python 3.9+
+- Java 17+ and Maven 3.9+
 - Docker (optional)
 
 ## Option 1: Local Development (Recommended for testing)
@@ -11,16 +10,16 @@
 ### Step 1: Start the RAG Agent
 
 ```powershell
-cd rag-agent
-pip install -r requirements.txt
-python main.py
+cd rag-agent-java
+mvn clean package -DskipTests
+java -jar target/rag-agent-1.0.0-SNAPSHOT.jar
 ```
 
 The agent will start at `http://localhost:8000`
 
 Verify it's running:
 ```powershell
-curl http://localhost:8000/
+curl http://localhost:8000/health
 ```
 
 ### Step 2: Test the Agent Directly
@@ -28,7 +27,7 @@ curl http://localhost:8000/
 ```powershell
 curl -X POST http://localhost:8000/run `
   -H "Content-Type: application/json" `
-  -d '{\"task\": \"rag_qa\", \"input\": {\"question\": \"What is the deadline for completing employee onboarding?\"}}'
+  -d '{\"task\": \"rag_qa\", \"input_data\": {\"question\": \"What is the deadline for completing employee onboarding?\"}}'
 ```
 
 ### Step 3: Build the Connector

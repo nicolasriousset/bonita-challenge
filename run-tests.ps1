@@ -8,23 +8,13 @@ Write-Host ""
 
 $originalLocation = Get-Location
 $projectRoot = $PSScriptRoot
-$agentPath = Join-Path $projectRoot "rag-agent"
+$agentPath = Join-Path $projectRoot "rag-agent-java"
 $connectorPath = Join-Path $projectRoot "bonita-connector-ai-agent"
 
 $errors = @()
 
-# Step 1: Check Python
-Write-Host "[1/6] Checking Python..." -ForegroundColor Yellow
-try {
-    $pythonVersion = python --version 2>&1
-    Write-Host "  ✓ Found: $pythonVersion" -ForegroundColor Green
-} catch {
-    Write-Host "  ✗ Python not found!" -ForegroundColor Red
-    $errors += "Python is required"
-}
-
-# Step 2: Check Java
-Write-Host "[2/6] Checking Java..." -ForegroundColor Yellow
+# Step 1: Check Java
+Write-Host "[1/4] Checking Java..." -ForegroundColor Yellow
 try {
     $javaVersion = java -version 2>&1 | Select-Object -First 1
     Write-Host "  ✓ Found: $javaVersion" -ForegroundColor Green
@@ -33,8 +23,8 @@ try {
     $errors += "Java is required"
 }
 
-# Step 3: Check Maven
-Write-Host "[3/6] Checking Maven..." -ForegroundColor Yellow
+# Step 2: Check Maven
+Write-Host "[2/4] Checking Maven..." -ForegroundColor Yellow
 try {
     $mavenVersion = mvn -version 2>&1 | Select-Object -First 1
     Write-Host "  ✓ Found: $mavenVersion" -ForegroundColor Green
@@ -54,32 +44,42 @@ if ($errors.Count -gt 0) {
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "  Starting RAG Agent" -ForegroundColor Cyan
+Write-Host "  Starting RAG Agent (Java/Spring Boot)" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Step 4: Start RAG Agent
-Write-Host "[4/6] Installing Python dependencies..." -ForegroundColor Yellow
+# Step 3: Build and Start RAG Agent
+Write-Host "[3/4] Building RAG Agent..." -ForegroundColor Yellow
 Set-Location $agentPath
-pip install -r requirements.txt | Out-Null
-Write-Host "  ✓ Dependencies installed" -ForegroundColor Green
+mvn clean package -DskipTests -q
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  ✗ Build failed!" -ForegroundColor Red
+    Set-Location $originalLocation
+    exit 1
+}
+Write-Host "  ✓ Build successful" -ForegroundColor Green
 
-Write-Host "[4/6] Starting RAG Agent..." -ForegroundColor Yellow
+Write-Host "[3/4] Starting RAG Agent..." -ForegroundColor Yellow
 $agentJob = Start-Job -ScriptBlock {
     param($path)
     Set-Location $path
-    python main.py
+    java -jar target/rag-agent-1.0.0-SNAPSHOT.jar
 } -ArgumentList $agentPath
 
 Write-Host "  ⏳ Waiting for agent to start..." -ForegroundColor Yellow
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 8
 
 # Check if agent is running
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:8000/" -TimeoutSec 5 -UseBasicParsing
-    Write-Host "  ✓ Agent running at http://localhost:8000" -ForegroundColor Green
+    $response = Invoke-RestMethod -Uri "http://localhost:8000/health" -Method Get -TimeoutSec 5
+    if ($response.status -eq "ok") {
+        Write-Host "  ✓ Agent running at http://localhost:8000" -ForegroundColor Green
+    } else {
+        throw "Unexpected response"
+    }
 } catch {
     Write-Host "  ✗ Agent failed to start!" -ForegroundColor Red
+    Write-Host "  Error: $_" -ForegroundColor Red
     Stop-Job $agentJob
     Remove-Job $agentJob
     Set-Location $originalLocation
@@ -92,12 +92,12 @@ Write-Host "  Testing RAG Agent" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Step 5: Test agent with sample query
-Write-Host "[5/6] Testing agent with sample query..." -ForegroundColor Yellow
+# Step 4: Test agent with sample query
+Write-Host "[4/4] Testing agent with sample query..." -ForegroundColor Yellow
 try {
     $body = @{
         task = "rag_qa"
-        input = @{
+        input_data = @{
             question = "What is the deadline for completing employee onboarding?"
         }
         params = @{
@@ -125,8 +125,8 @@ Write-Host "  Running Connector Integration Tests" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Step 6: Run Maven tests
-Write-Host "[6/6] Running integration tests..." -ForegroundColor Yellow
+# Step 5: Run Maven tests
+Write-Host "[4/4] Running integration tests..." -ForegroundColor Yellow
 Set-Location $connectorPath
 
 $testResult = mvn test 2>&1

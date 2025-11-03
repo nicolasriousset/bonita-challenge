@@ -2,6 +2,71 @@
 
 All notable changes and development steps for this project.
 
+## [2.0.0] - 2025-11-03
+
+### 🚀 Major Architecture Change: Python → Java/Spring Boot
+
+#### Complete RAG Agent Rewrite
+- **Replaced Python FastAPI with Java Spring Boot 3.2**
+  - Enterprise-grade Spring Boot framework
+  - Java 17 with modern features
+  - Full compatibility with Bonita connector
+
+#### New Implementation (`rag-agent-java/`)
+- **Core Components:**
+  - `RagAgentApplication.java` - Spring Boot application
+  - `AgentController.java` - REST endpoints (/health, /run)
+  - `RagService.java` - RAG logic with conflict detection
+  - `Document.java`, `AgentRequest.java`, `AgentResponse.java` - DTOs
+
+- **Features Preserved:**
+  - ✅ Document retrieval with similarity scoring
+  - ✅ Conflict detection between document versions
+  - ✅ Most-recent resolution strategy
+  - ✅ Confidence scoring
+  - ✅ JSON document loading from classpath
+
+- **Dependencies:**
+  - Spring Boot Starter Web 3.2.0
+  - Spring Boot Validation
+  - Jackson (JSON processing)
+  - Apache Tika (document parsing)
+  - Lombok (boilerplate reduction)
+
+#### Docker Support
+- Multi-stage Dockerfile for optimized builds
+- Maven build stage + JRE runtime stage
+- Health checks with wget
+- Non-root user execution
+- Updated `docker-compose.yml` for Java service
+
+#### Documents Migrated
+- Converted `.txt` → `.json` format
+- `incident_policy_2022.json` (48h reporting)
+- `incident_policy_2023.json` (72h reporting)
+- `onboarding_policy.json` (5 business days)
+
+#### Testing Results
+- ✅ Maven compilation successful
+- ✅ Application starts on port 8000
+- ✅ Loads 3 documents at startup
+- ✅ Compatible with existing Bonita connector
+
+**Build Commands:**
+```bash
+cd rag-agent-java
+mvn clean package
+java -jar target/rag-agent-1.0.0-SNAPSHOT.jar
+```
+
+**Migration Rationale:**
+- Better Java ecosystem integration with Bonita
+- Enterprise support and scalability
+- Type safety and compile-time checking
+- Simplified deployment (single JAR)
+
+---
+
 ## [1.0.2] - 2025-11-03
 
 ### ✅ Testing & Fixes

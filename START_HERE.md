@@ -13,7 +13,7 @@ Welcome to the Bonita AI Agent Connector project!
 
 **Setup**:
 1. Read [QUICKSTART.md](QUICKSTART.md)
-2. Start agent: `cd rag-agent && python main.py`
+2. Build and start agent: `cd rag-agent-java && mvn clean package && java -jar target/*.jar`
 3. Run tests: `cd bonita-connector-ai-agent && mvn test`
 
 ## 📚 Documentation
@@ -24,18 +24,19 @@ Full navigation guide: [INDEX.md](INDEX.md)
 
 All challenge requirements **complete and tested** ✅
 
-- ✅ Connector (Java)
-- ✅ Agent with reasoning (Python)
+- ✅ Connector (Java/Bonita 10.2.0)
+- ✅ Agent with reasoning (Java/Spring Boot 3.2)
 - ✅ Integration tests (7/7 passing)
-- ✅ Documentation (10 guides)
+- ✅ Documentation (10+ guides)
 - ✅ AI usage report (detailed)
 
 ## 🎁 Highlights
 
 - **True AI Reasoning**: Detects conflicts, resolves intelligently, explains decisions
 - **Comprehensive Tests**: 7 scenarios including conflict resolution
-- **Excellent Docs**: 10 guides covering all aspects
+- **Excellent Docs**: 10+ guides covering all aspects
 - **Easy Evaluation**: Automated test scripts, clear navigation
+- **Migration**: Complete Python→Java migration documented
 
 ---
 

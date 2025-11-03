@@ -1,0 +1,23 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: rag-agent
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      indent_output: true
+
+logging:
+  level:
+    root: INFO
+    com.bonitasoft.ai: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# RAG Agent Configuration
+rag:
+  documents-path: classpath:documents/
+  confidence-threshold: 0.65
+  max-sources: 5

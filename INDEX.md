@@ -43,9 +43,15 @@ Welcome to the Bonita AI Agent Connector project! This index helps you navigate 
    - Version information
    - Complete feature list
 
+7. **[MIGRATION_NOTE.md](MIGRATION_NOTE.md)** ⭐
+   - **Python → Java migration status**
+   - What was changed
+   - Current architecture
+   - Historical documentation notes
+
 ## 🤖 AI Development Report
 
-7. **[AI_USAGE_REPORT.md](AI_USAGE_REPORT.md)** ⭐⭐⭐
+8. **[AI_USAGE_REPORT.md](AI_USAGE_REPORT.md)** ⭐⭐⭐
    - **Required reading for evaluation**
    - Detailed AI tool usage (70% AI / 30% manual)
    - Specific prompts and iterations
@@ -55,7 +61,7 @@ Welcome to the Bonita AI Agent Connector project! This index helps you navigate 
 
 ## 🔧 Command Reference
 
-8. **[COMMANDS.md](COMMANDS.md)**
+9. **[COMMANDS.md](COMMANDS.md)**
    - Quick command reference
    - Testing commands
    - Docker commands
@@ -66,23 +72,30 @@ Welcome to the Bonita AI Agent Connector project! This index helps you navigate 
 
 ### Java Connector
 
-9. **[bonita-connector-ai-agent/README.md](bonita-connector-ai-agent/README.md)**
-   - Connector parameters (inputs/outputs)
-   - Building and testing
-   - Installation in Bonita Studio
-   - Usage examples
-   - Architecture details
-   - Error handling
+10. **[bonita-connector-ai-agent/README.md](bonita-connector-ai-agent/README.md)**
+    - Connector parameters (inputs/outputs)
+    - Building and testing
+    - Installation in Bonita Studio
+    - Usage examples
+    - Architecture details
+    - Error handling
 
-### Python Agent
+### Java Agent (Current Implementation)
 
-10. **[rag-agent/README.md](rag-agent/README.md)**
+11. **[rag-agent-java/README.md](rag-agent-java/README.md)** ⭐
+    - **Current Java/Spring Boot implementation**
     - API endpoints documentation
     - Installation (local/Docker)
     - Conflict resolution algorithm
     - Configuration parameters
     - Testing examples
     - Architecture diagram
+
+12. **[MIGRATION_PYTHON_TO_JAVA.md](MIGRATION_PYTHON_TO_JAVA.md)**
+    - Detailed migration guide
+    - Comparison table
+    - Feature mapping
+    - Testing examples
 
 ## 📂 Source Code
 
@@ -91,13 +104,15 @@ Welcome to the Bonita AI Agent Connector project! This index helps you navigate 
 - **Tests**: `bonita-connector-ai-agent/src/test/java/com/bonitasoft/connector/aiagent/AIAgentConnectorIT.java`
 - **Config**: `bonita-connector-ai-agent/pom.xml`
 
-### Agent (Python)
-- **Main**: `rag-agent/main.py`
-- **Documents**: `rag-agent/documents/*.txt`
-- **Config**: `rag-agent/requirements.txt`
+### Agent (Java/Spring Boot)
+- **Main**: `rag-agent-java/src/main/java/com/bonitasoft/ai/RagAgentApplication.java`
+- **Service**: `rag-agent-java/src/main/java/com/bonitasoft/ai/service/RagService.java`
+- **Controller**: `rag-agent-java/src/main/java/com/bonitasoft/ai/controller/AgentController.java`
+- **Documents**: `rag-agent-java/src/main/resources/documents/*.json`
+- **Config**: `rag-agent-java/pom.xml`, `rag-agent-java/src/main/resources/application.yml`
 
 ### Infrastructure
-- **Docker**: `docker-compose.yml`
+- **Docker**: `docker-compose.yml`, `rag-agent-java/Dockerfile`
 - **Connector Definition**: `bonita-connector-ai-agent/src/main/resources/ai-agent-connector.def`
 
 ## 🎯 Recommended Reading Order

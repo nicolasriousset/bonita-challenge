@@ -1,0 +1,7 @@
+{
+  "title": "Security Incident Procedure - 2023",
+  "version": "2023-12",
+  "date": "2023-12-01",
+  "category": "security",
+  "content": "Security incidents must be reported within 72 hours using the new centralized reporting tool. The Security Office is responsible for coordinating the response. An incident includes unauthorized access, data breach, or attempted attack. All employees must use the new online reporting portal accessible at security.company.com. The extended 72-hour reporting window allows for better assessment and documentation before reporting. The Security Office will acknowledge all reports within 24 hours of submission. Proper incident classification is required using the new severity matrix (Critical, High, Medium, Low)."
+}

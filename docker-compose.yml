@@ -3,22 +3,21 @@ version: '3.8'
 services:
   rag-agent:
     build:
-      context: ./rag-agent
+      context: ./rag-agent-java
       dockerfile: Dockerfile
     container_name: bonita-rag-agent
     ports:
       - "8000:8000"
     environment:
-      - LOG_LEVEL=info
-    volumes:
-      - ./rag-agent/documents:/app/documents:ro
+      - SPRING_PROFILES_ACTIVE=prod
+      - JAVA_OPTS=-Xmx512m -Xms256m
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 40s
 
 networks:
   default:

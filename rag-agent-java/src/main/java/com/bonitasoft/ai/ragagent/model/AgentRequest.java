@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
@@ -22,7 +24,8 @@ public class AgentRequest {
     private String task;
 
     @JsonProperty("input_data")
-    @NotBlank(message = "Input data is required")
+    @NotNull(message = "Input data cannot be null")
+    @NotEmpty(message = "Input data cannot be empty")
     private Map<String, Object> inputData;
 
     private Map<String, Object> params;

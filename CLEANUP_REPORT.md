@@ -1,67 +1,131 @@
-# ✅ Nettoyage Complet - Décembre 2024
+# 📝 Nettoyage Effectué - 3 Novembre 2025# ✅ Nettoyage Complet - Décembre 2024
 
-## Changements Effectués
 
-### 🗑️ Suppression du Code Python
-- ❌ **Supprimé** : Répertoire `rag-agent/` (implémentation Python/FastAPI complète)
-  - `main.py` (400+ lignes)
-  - `requirements.txt`
-  - `Dockerfile`
+
+## Fichiers Supprimés## Changements Effectués
+
+
+
+### Scripts d'installation obsolètes### 🗑️ Suppression du Code Python
+
+- ❌ `create-connector-package.ps1` - Création de ZIP (inutile, Bonita accepte les JAR directement)- ❌ **Supprimé** : Répertoire `rag-agent/` (implémentation Python/FastAPI complète)
+
+- ❌ `install-connector-bonita.ps1` - Installation automatique dans workspace (complexe et fragile)  - `main.py` (400+ lignes)
+
+- ❌ `install-connector-clean.ps1` - Installation avec nettoyage cache (non nécessaire)  - `requirements.txt`
+
+- ❌ `ai-agent-connector-1.0.0.zip` - Archive ZIP créée (inutilisée)  - `Dockerfile`
+
   - `documents/*.txt`
-  - `README.md`
 
-### 📝 Fichiers de Documentation Mis à Jour
+## Raison du Nettoyage  - `README.md`
 
-#### Fichiers Principaux
-1. **`.github/copilot-instructions.md`**
+
+
+**Découverte importante** : Bonita Studio 2024.3 permet d'importer directement le JAR via l'interface graphique :### 📝 Fichiers de Documentation Mis à Jour
+
+- **New > Extensions > Add a custom extension > connector**
+
+- Sélectionner le JAR avec dépendances#### Fichiers Principaux
+
+- Le JAR contient déjà `.def` et `.impl` → import automatique1. **`.github/copilot-instructions.md`**
+
    - ❌ Retiré : "Python FastAPI service"
-   - ✅ Ajouté : "Java/Spring Boot 3.2 service"
+
+Les scripts d'installation automatique étaient donc **inutilement complexes** et tentaient de recréer manuellement la structure `connectors-dev/`, ce qui n'était pas la bonne approche.   - ✅ Ajouté : "Java/Spring Boot 3.2 service"
+
    - ✅ Statut : Développement complet
 
+## Solution Finale
+
 2. **`README.md`**
-   - ❌ Retiré : "Python/FastAPI"
-   - ✅ Ajouté : "Java/Spring Boot 3.2"
-   - ✅ Prérequis : Java 17+ et Maven 3.9+ (plus Python)
-   - ✅ Architecture : Spring Boot au lieu de FastAPI
+
+### Méthode Simple ✅   - ❌ Retiré : "Python/FastAPI"
+
+1. Compiler : `mvn clean package`   - ✅ Ajouté : "Java/Spring Boot 3.2"
+
+2. Importer le JAR via l'interface Bonita Studio   - ✅ Prérequis : Java 17+ et Maven 3.9+ (plus Python)
+
+3. Le connecteur apparaît dans la catégorie "AI"   - ✅ Architecture : Spring Boot au lieu de FastAPI
+
    - ✅ Structure : `rag-agent-java/` au lieu de `rag-agent/`
 
-3. **`QUICKSTART.md`**
-   - ❌ Retiré : Commandes Python (`pip install`, `python main.py`)
-   - ✅ Ajouté : Commandes Java (`mvn clean package`, `java -jar`)
-   - ✅ Health check : `/health` au lieu de `/`
+### Documentation
+
+- ✅ `BONITA_INSTALLATION.md` - Guide d'installation complet et simplifié3. **`QUICKSTART.md`**
+
+- ✅ `README.md` - Référence au guide d'installation   - ❌ Retiré : Commandes Python (`pip install`, `python main.py`)
+
+- ✅ `run-tests.ps1` - Script de tests conservé   - ✅ Ajouté : Commandes Java (`mvn clean package`, `java -jar`)
+
+- ✅ `test-connector.ps1` - Script de test du RAG Agent conservé   - ✅ Health check : `/health` au lieu de `/`
+
    - ✅ Format API : `input_data` au lieu de `input`
 
+## Fichiers Clés Conservés
+
 4. **`START_HERE.md`**
-   - ❌ Retiré : "Agent with reasoning (Python)"
-   - ✅ Ajouté : "Agent with reasoning (Java/Spring Boot 3.2)"
-   - ✅ Commandes : Maven/Java au lieu de Python
+
+### Scripts PowerShell   - ❌ Retiré : "Agent with reasoning (Python)"
+
+- `run-tests.ps1` - Lance tous les tests d'intégration Maven   - ✅ Ajouté : "Agent with reasoning (Java/Spring Boot 3.2)"
+
+- `test-connector.ps1` - Teste le RAG Agent directement (sans Bonita)   - ✅ Commandes : Maven/Java au lieu de Python
+
    - ✅ Statut : Migration documentée
 
-5. **`INDEX.md`**
-   - ❌ Retiré : Section "Python Agent" avec liens `rag-agent/`
-   - ✅ Ajouté : Section "Java Agent (Current Implementation)"
-   - ✅ Ajouté : Lien vers `MIGRATION_NOTE.md`
+### Documentation
+
+- `README.md` - Documentation principale5. **`INDEX.md`**
+
+- `BONITA_INSTALLATION.md` - Guide d'installation détaillé (nouveau)   - ❌ Retiré : Section "Python Agent" avec liens `rag-agent/`
+
+- `QUICKSTART.md` - Guide de démarrage rapide   - ✅ Ajouté : Section "Java Agent (Current Implementation)"
+
+- `FOR_EVALUATOR.md` - Guide pour les évaluateurs   - ✅ Ajouté : Lien vers `MIGRATION_NOTE.md`
+
    - ✅ Ajouté : Lien vers `MIGRATION_PYTHON_TO_JAVA.md`
-   - ✅ Code source : Chemins Java au lieu de Python
 
-#### Scripts de Test
+## Structure du JAR Final   - ✅ Code source : Chemins Java au lieu de Python
+
+
+
+Le JAR `bonita-connector-ai-agent-1.0.0-SNAPSHOT-jar-with-dependencies.jar` contient :#### Scripts de Test
+
 6. **`run-tests.ps1`** (PowerShell)
-   - ❌ Retiré : Vérification Python (étape 1)
-   - ❌ Retiré : Installation pip (étape 4)
-   - ❌ Retiré : Démarrage Python (`python main.py`)
-   - ✅ Ajouté : Build Maven (`mvn clean package`)
-   - ✅ Ajouté : Démarrage Java (`java -jar target/*.jar`)
-   - ✅ Mis à jour : Health check `/health`
-   - ✅ Mis à jour : Format requête `input_data`
-   - ✅ Réduit : De 6 étapes à 4 étapes
-   - ✅ Chemin agent : `rag-agent-java` au lieu de `rag-agent`
 
-7. **`run-tests.sh`** (Bash)
+```   - ❌ Retiré : Vérification Python (étape 1)
+
+com/bonitasoft/connector/aiagent/   - ❌ Retiré : Installation pip (étape 4)
+
+├── AIAgentConnector.class   - ❌ Retiré : Démarrage Python (`python main.py`)
+
+└── ... (dépendances)   - ✅ Ajouté : Build Maven (`mvn clean package`)
+
+ai-agent-connector.def          ← Définition du connecteur   - ✅ Ajouté : Démarrage Java (`java -jar target/*.jar`)
+
+ai-agent-connector.impl         ← Implémentation (référence la classe)   - ✅ Mis à jour : Health check `/health`
+
+```   - ✅ Mis à jour : Format requête `input_data`
+
+   - ✅ Réduit : De 6 étapes à 4 étapes
+
+Cette structure permet à Bonita de reconnaître automatiquement le connecteur lors de l'import.   - ✅ Chemin agent : `rag-agent-java` au lieu de `rag-agent`
+
+
+
+## Leçons Apprises7. **`run-tests.sh`** (Bash)
+
    - ❌ Retiré : Détection Python (`PYTHON_CMD`)
-   - ❌ Retiré : Installation pip
-   - ❌ Retiré : Démarrage Python
-   - ✅ Ajouté : Build Maven
-   - ✅ Ajouté : Démarrage Java
+
+1. **Bonita 2024.3 a évolué** : Plus besoin de structure `connectors-dev/` manuelle   - ❌ Retiré : Installation pip
+
+2. **Import via GUI** : Plus simple et plus fiable que scripts automatiques   - ❌ Retiré : Démarrage Python
+
+3. **JAR auto-suffisant** : `.def` + `.impl` dans le JAR = import direct   - ✅ Ajouté : Build Maven
+
+4. **Documentation claire** : Mieux qu'automatisation fragile   - ✅ Ajouté : Démarrage Java
+
    - ✅ Mis à jour : Health check `/health`
    - ✅ Mis à jour : Format requête `input_data`
    - ✅ Réduit : De 6 étapes à 4 étapes

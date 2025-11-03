@@ -47,12 +47,14 @@ The agent will be available at `http://localhost:8000`
 
 Verify: `curl http://localhost:8000/health`
 
-### 2. Build the Connector
+### 2. Build and Install the Connector
 
 ```powershell
 cd bonita-connector-ai-agent
-mvn clean install
+mvn clean package
 ```
+
+**To install in Bonita Studio:** See [BONITA_INSTALLATION.md](BONITA_INSTALLATION.md) 📖
 
 ### 3. Run Integration Tests ⭐
 

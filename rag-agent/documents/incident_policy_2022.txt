@@ -1,0 +1,15 @@
+Title: Security Incident Procedure - 2022
+Version: 2022-07
+Department: IT
+
+All data incidents must be reported within 48 hours to the IT department using the Incident Report Form.
+
+Employees should contact the IT Helpdesk immediately upon discovering an incident.
+
+A security incident includes any unauthorized access, data loss, or system compromise.
+
+The IT department is responsible for coordinating the initial response and assessment.
+
+All incidents must be documented in the central incident tracking system within the 48-hour window.
+
+Failure to report within the specified timeframe may result in disciplinary action.

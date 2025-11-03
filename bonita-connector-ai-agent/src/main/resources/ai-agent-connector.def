@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition:ConnectorDefinition xmlns:definition="http://www.bonitasoft.org/ns/connector/definition/6.1"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <id>ai-agent-connector</id>
+    <version>1.0.0</version>
+    
+    <icon>connector.png</icon>
+    
+    <category id="ai" icon="ai.png"/>
+    
+    <input name="agentUrl" type="java.lang.String" mandatory="true"/>
+    <input name="authHeader" type="java.lang.String" mandatory="false"/>
+    <input name="task" type="java.lang.String" mandatory="false" defaultValue="rag_qa"/>
+    <input name="inputData" type="java.lang.String" mandatory="true"/>
+    <input name="params" type="java.lang.String" mandatory="false"/>
+    <input name="timeoutMs" type="java.lang.Integer" mandatory="false" defaultValue="30000"/>
+    
+    <output name="status" type="java.lang.String"/>
+    <output name="output" type="java.lang.String"/>
+    <output name="usage" type="java.lang.String"/>
+    <output name="error" type="java.lang.String"/>
+    
+    <page id="connection">
+        <widget id="agentUrl" inputName="agentUrl" 
+                xsi:type="definition:Text"/>
+        <widget id="authHeader" inputName="authHeader" 
+                xsi:type="definition:Text"/>
+        <widget id="task" inputName="task" 
+                xsi:type="definition:Select">
+            <items>rag_qa</items>
+            <items>summarize</items>
+            <items>classify</items>
+        </widget>
+        <widget id="timeoutMs" inputName="timeoutMs" 
+                xsi:type="definition:Text"/>
+    </page>
+    
+    <page id="request">
+        <widget id="inputData" inputName="inputData" 
+                xsi:type="definition:TextArea"/>
+        <widget id="params" inputName="params" 
+                xsi:type="definition:TextArea"/>
+    </page>
+    
+    <jarDependency>bonita-connector-ai-agent-1.0.0-SNAPSHOT-jar-with-dependencies.jar</jarDependency>
+    
+</definition:ConnectorDefinition>

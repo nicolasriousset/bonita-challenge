@@ -5,13 +5,12 @@ import org.bonitasoft.engine.connector.ConnectorException;
 import org.bonitasoft.engine.connector.ConnectorValidationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.ParseException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +128,7 @@ public class AIAgentConnector extends AbstractConnector {
                 httpPost.setEntity(new StringEntity(jsonPayload, StandardCharsets.UTF_8));
 
                 try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                    int statusCode = response.getCode();
+                    int statusCode = response.getStatusLine().getStatusCode();
                     String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
                     
                     LOGGER.debug("Response status: {}, body: {}", statusCode, responseBody);
@@ -149,7 +148,7 @@ public class AIAgentConnector extends AbstractConnector {
                 }
             }
 
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             LOGGER.error("Error communicating with AI Agent", e);
             setAndStoreOutputParameter(STATUS, "error");
             setAndStoreOutputParameter(ERROR, "Communication error: " + e.getMessage());
